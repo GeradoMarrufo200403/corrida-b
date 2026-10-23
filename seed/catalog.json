@@ -1,0 +1,63 @@
+{
+  "products": [
+    {
+      "sku": "CAC-TAB-70",
+      "name": "Tablilla de cacao 70%",
+      "price": "85.00",
+      "perishable": false,
+      "lots": [
+        {"code": "L-TAB-001", "quantity": 50, "expires_in_days": 300},
+        {"code": "L-TAB-002", "quantity": 30, "expires_in_days": 420}
+      ]
+    },
+    {
+      "sku": "CAC-NIB",
+      "name": "Nibs de cacao tostado 250 g",
+      "price": "120.00",
+      "perishable": false,
+      "lots": [
+        {"code": "L-NIB-001", "quantity": 40, "expires_in_days": 240}
+      ]
+    },
+    {
+      "sku": "CAC-POLV",
+      "name": "Cacao en polvo 150 g",
+      "price": "95.00",
+      "perishable": false,
+      "lots": [
+        {"code": "L-POL-001", "quantity": 60, "expires_in_days": 365}
+      ]
+    },
+    {
+      "sku": "CAC-BEB",
+      "name": "Chocolate para beber 500 g",
+      "price": "180.00",
+      "perishable": false,
+      "lots": [
+        {"code": "L-BEB-001", "quantity": 25, "expires_in_days": 180},
+        {"code": "L-BEB-002", "quantity": 25, "expires_in_days": 200}
+      ]
+    },
+    {
+      "sku": "CAC-TRF6",
+      "name": "Trufas artesanales, caja de 6",
+      "price": "220.00",
+      "perishable": true,
+      "lots": [
+        {"code": "L-TRF-001", "quantity": 10, "expires_in_days": -3},
+        {"code": "L-TRF-002", "quantity": 8, "expires_in_days": 4},
+        {"code": "L-TRF-003", "quantity": 12, "expires_in_days": 20}
+      ]
+    },
+    {
+      "sku": "CAC-BOM12",
+      "name": "Bombones de cajeta, caja de 12",
+      "price": "260.00",
+      "perishable": true,
+      "lots": [
+        {"code": "L-BOM-001", "quantity": 6, "expires_in_days": 12},
+        {"code": "L-BOM-002", "quantity": 10, "expires_in_days": 25}
+      ]
+    }
+  ]
+}

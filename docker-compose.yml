@@ -1,0 +1,22 @@
+# Postgres local para OrderFlow. Uso: docker compose up -d
+# El usuario orderflow es superusuario de desarrollo: setup_db.py crea las bases que necesite cada carpeta.
+services:
+  db:
+    image: postgres:17
+    container_name: orderflow-db
+    environment:
+      POSTGRES_USER: orderflow
+      POSTGRES_PASSWORD: orderflow
+      POSTGRES_DB: orderflow
+    ports:
+      - "5433:5432"
+    volumes:
+      - orderflow-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orderflow -d orderflow"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  orderflow-data:
