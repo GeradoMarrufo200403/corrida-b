@@ -9,7 +9,7 @@ Usa la base de datos de DATABASE_URL (archivo .env de esa carpeta) y la VACIA al
 no la apunte a una base con datos que le importen.
 """
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 
 from fastapi.testclient import TestClient
@@ -24,7 +24,7 @@ TAB = "CAC-TAB-70"
 
 
 def entorno():
-    clock = FixedClock(datetime(2026, 10, 5, 12, 0, tzinfo=timezone.utc))
+    clock = FixedClock(datetime(2026, 10, 5, 12, 0, tzinfo=UTC))
     notifier = ConsoleNotificationSender()
     container = Container(clock=clock, notifier=notifier)
     reset_and_seed(container.engine, clock)  # base limpia y catalogo fresco en cada comprobacion
@@ -172,7 +172,7 @@ def verificar_base():
         c = Container()
         with c.engine.connect() as conn:
             conn.execute(text("SELECT 1 FROM orders LIMIT 1"))
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print("No pude usar la base de datos de esta carpeta:", type(e).__name__)
         print("Revise que Postgres este arriba (docker compose up -d) y que haya corrido: python setup_db.py")
         sys.exit(2)
@@ -187,7 +187,7 @@ def main():
     for clave, texto, fn in pruebas:
         try:
             paso = bool(fn())
-        except Exception as e:  # una excepcion cuenta como FAIL
+        except Exception as e:  # noqa: BLE001  (una excepcion cuenta como FAIL)
             paso = False
             texto += f" (error: {type(e).__name__})"
         ok += paso

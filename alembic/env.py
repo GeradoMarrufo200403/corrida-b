@@ -1,8 +1,8 @@
-from alembic import context
 from sqlalchemy import create_engine
 
-import app.inventory.models  # noqa: F401  (registra las tablas en Base.metadata)
+import app.inventory.models
 import app.orders.models  # noqa: F401
+from alembic import context
 from app.db import Base, database_url
 
 target_metadata = Base.metadata

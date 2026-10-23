@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
-from sqlalchemy import text
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
 
 from app.container import Container
 from app.inventory.router import router as inventory_router

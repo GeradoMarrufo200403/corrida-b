@@ -4,7 +4,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from app.shared.errors import ValidationFailed
 from app.shared.schemas import LineIn
 
-VOLUME_THRESHOLD = Decimal("500")
+VOLUME_THRESHOLD = Decimal(500)
 VOLUME_RATE = Decimal("0.10")
 VIP_RATE = Decimal("0.05")
 VIP_DOMAIN = "@vip.com"
@@ -52,7 +52,7 @@ def is_vip(customer_email: str) -> bool:
 
 
 def calculate_total(items: list[PricedItem], customer_email: str) -> PriceBreakdown:
-    subtotal = money(sum((i.unit_price * i.quantity for i in items), Decimal("0")))
+    subtotal = money(sum((i.unit_price * i.quantity for i in items), Decimal(0)))
     volume_discount = Decimal("0.00")
     if subtotal > VOLUME_THRESHOLD:
         volume_discount = money(subtotal * VOLUME_RATE)

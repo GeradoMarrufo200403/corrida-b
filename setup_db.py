@@ -7,13 +7,13 @@ Lee DATABASE_URL del archivo .env. Es seguro ejecutarlo varias veces.
 """
 import sys
 
-from alembic import command
 from alembic.config import Config
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import make_url
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
+from alembic import command
 from app.db import database_url, make_engine
 from app.seed import load_catalog
 from app.shared.clock import SystemClock
