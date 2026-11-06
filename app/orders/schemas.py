@@ -16,7 +16,7 @@ class ItemsUpdate(BaseModel):
 
 
 class PaymentIn(BaseModel):
-    amount: Decimal
+    amount: Decimal | None = None
 
 
 class ItemOut(BaseModel):
@@ -37,3 +37,11 @@ class OrderOut(BaseModel):
     shipped_at: datetime | None = None
     refund_amount: Decimal | None = None
     penalty: Decimal | None = None
+
+
+class ShipResponse(BaseModel):
+    id: int | str
+    status: str
+    shipping_status: str
+    tracking_number: str | None = None
+

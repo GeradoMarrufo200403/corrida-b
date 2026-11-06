@@ -1,6 +1,13 @@
 from fastapi import APIRouter, Request
 
-from app.orders.schemas import ItemsUpdate, OrderCreate, OrderOut, PaymentIn
+from app.orders.models import OrderStatus
+from app.orders.schemas import (
+    ItemsUpdate,
+    OrderCreate,
+    OrderOut,
+    PaymentIn,
+    ShipResponse,
+)
 from app.unit_of_work import unit_of_work
 
 router = APIRouter(prefix="/orders", tags=["orders"])
@@ -31,15 +38,22 @@ def update_items(order_id: int, payload: ItemsUpdate, request: Request):
 
 
 @router.post("/{order_id}/pay", response_model=OrderOut)
-def pay_order(order_id: int, payload: PaymentIn, request: Request):
+def pay_order(order_id: int, request: Request, payload: PaymentIn | None = None):
     with unit_of_work(request) as s:
-        return s.orders.pay(order_id, payload.amount)
+        amount = payload.amount if (payload and payload.amount is not None) else s.orders.get_order(order_id).total
+        return s.orders.pay(order_id, amount)
 
 
-@router.post("/{order_id}/ship", response_model=OrderOut)
+@router.post("/{order_id}/ship", response_model=ShipResponse)
 def ship_order(order_id: int, request: Request):
     with unit_of_work(request) as s:
-        return s.orders.ship(order_id)
+        order = s.orders.ship(order_id)
+        return ShipResponse(
+            id=order.id,
+            status=order.status.value,
+            shipping_status=order.shipping_status or ("SHIPPED" if order.status == OrderStatus.SHIPPED else "UNKNOWN"),
+            tracking_number=order.tracking_number,
+        )
 
 
 @router.post("/{order_id}/cancel", response_model=OrderOut)

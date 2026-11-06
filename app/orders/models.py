@@ -47,6 +47,8 @@ class Order(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
     shipped_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+    shipping_status: Mapped[str | None] = mapped_column(String(32), default=None, nullable=True)
+    tracking_number: Mapped[str | None] = mapped_column(String(64), default=None, nullable=True)
 
     items: Mapped[list[OrderItem]] = relationship(
         lazy="selectin", cascade="all, delete-orphan", order_by=OrderItem.id

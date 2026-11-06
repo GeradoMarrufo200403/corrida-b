@@ -83,11 +83,48 @@ class OrderService:
 
     def ship(self, order_id: int) -> Order:
         order = self.get_order(order_id, lock=True)
-        self._apply_transition(order, OrderStatus.SHIPPED)
-        self.inventory.confirm(order.id)
-        order.status = OrderStatus.SHIPPED
-        order.shipped_at = self.clock.now()
-        self.notifier.send(order.customer_email, f"Tu orden {order.id} va en camino")
+
+        # Idempotencia: si ya fue enviada con guía confirmada, no duplicar
+        if order.status == OrderStatus.SHIPPED and order.tracking_number:
+            return order
+
+        # Regla SHP-01: solo se envía orden pagada
+        if order.status != OrderStatus.PAID:
+            raise Conflict("Solo se puede pedir el envío de una orden pagada", "order_not_paid")
+
+        # Regla SHP-03: perecedero con al menos 10 días de vida útil
+        reservation = self.inventory.repo.get_reservation(order.id)
+        if reservation:
+            for alloc in reservation.allocations:
+                lot = self.inventory.repo.get_lot(alloc.lot_code)
+                product = self.inventory.repo.get_product(lot.sku)
+                if product and product.perishable:
+                    dias_vida = (lot.expires_on - self.clock.today()).days
+                    if dias_vida < 10:
+                        raise Conflict(
+                            "Producto perecedero tiene menos de 10 días de vida útil",
+                            "perishable_expiring_soon",
+                        )
+
+        # Solicitar envío a la paquetería externa
+        from app.shipping.carrier import CarrierClient
+
+        carrier = CarrierClient()
+        result = carrier.request_shipping(order.id)
+
+        order.shipping_status = result.shipping_status
+        if result.status == "SHIPPED" and result.tracking_number:
+            self._apply_transition(order, OrderStatus.SHIPPED)
+            self.inventory.confirm(order.id)
+            order.status = OrderStatus.SHIPPED
+            order.tracking_number = result.tracking_number
+            order.shipped_at = self.clock.now()
+            self.notifier.send(order.customer_email, f"Tu orden {order.id} va en camino")
+        else:
+            # Sigue pagada (PAID), nunca se pierde
+            order.status = OrderStatus.PAID
+            order.tracking_number = None
+
         return order
 
     def cancel(self, order_id: int) -> Order:

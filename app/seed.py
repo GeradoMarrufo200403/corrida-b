@@ -7,6 +7,7 @@ from pathlib import Path
 from sqlalchemy import Engine, text
 from sqlalchemy.orm import Session
 
+import app.orders.models  # noqa: F401
 from app.inventory.models import Lot, Product
 from app.shared.clock import Clock
 

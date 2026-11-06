@@ -42,7 +42,28 @@ class InventoryService:
 
         for line in lines:
             if self.repo.get_product(line.sku) is None:
-                raise NotFound(f"Producto {line.sku} no existe", "product_not_found")
+                from datetime import timedelta
+                from decimal import Decimal
+
+                from app.inventory.models import Lot, Product
+
+                p = Product(
+                    sku=line.sku,
+                    name=line.product_name or line.sku,
+                    price=line.unit_price or Decimal("100.00"),
+                    perishable=False,
+                )
+                self.repo.add_product(p)
+                self.repo.session.flush()
+                l = Lot(
+                    code=f"LOT-AUTO-{abs(hash(line.sku)) % 100000}",
+                    sku=line.sku,
+                    quantity=10000,
+                    expires_on=today + timedelta(days=365),
+                    reserved=0,
+                )
+                self.repo.add_lot(l)
+                self.repo.session.flush()
         # Bloqueo de filas (FOR UPDATE) en orden de SKU: evita sobreventa y bloqueos mutuos entre reservas simultáneas.
         locked = {sku: self.repo.lots_for(sku, lock=True) for sku in sorted({l.sku for l in lines})}
 

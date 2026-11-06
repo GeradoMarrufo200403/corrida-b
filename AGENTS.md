@@ -30,6 +30,20 @@ ORD-06 | Transiciones de estado: Solo se paga una orden 'pending'. Solo se enví
 ORD-07 | Cancelación: Una orden 'pending' sí se cancela (cambia a 'canceled') y libera su inventario apartado. Una orden 'paid' sí se cancela: si se cancela dentro de las 24 horas siguientes al pago, se devuelve el 100% (refund_amount = total, penalty = 0); si transcurrieron más de 24 horas del pago, se retiene el 10% por penalización (penalty = 10% del total, refund_amount = 90% del total). Devuelve refund_amount y penalty y libera inventario apartado. Una orden 'shipped' NO se cancela bajo ninguna circunstancia (409 Conflict).
 ORD-08 | Notificaciones: Se envía notificación únicamente al pagar ('paid') y al enviar ('shipped'). NUNCA enviar avisos o correos al cancelar.
 
+### Envíos con la paquetería (SHP)
+SHP-01 | Solo se pide el envío de una orden pagada (estado PAID). Una orden en cualquier otro estado se rechaza con conflicto (409 Conflict).
+SHP-02 | Una orden tiene a lo más un envío en toda su vida, sin importar cuántas veces se pida o se reintente. La clave del envío es estrictamente 'envio-{order_id}' y no cambia entre reintentos.
+SHP-03 | Un producto perecedero se envía solo si le quedan al menos 10 días de vida. Si no, el envío se rechaza con conflicto (409 Conflict) y la orden sigue pagada.
+SHP-04 | Una orden solo se muestra como enviada (status = SHIPPED) si el proveedor entregó un número de guía válido (tracking_number).
+SHP-05 | Si el proveedor falla o no se sabe qué pasó (timeout, 500, desconexión), la orden no se pierde ni se cobra de nuevo: sigue pagada (PAID) y queda registrada en UNKNOWN o PENDING_RETRY para volver a intentarse.
+SHP-06 | Si el proveedor rechaza el envío de forma definitiva (4xx de datos no recuperables), la orden queda en PAID con shipping_status en FAILED y su motivo, y no se reintenta.
+- Espera máxima por llamada: 2.0 segundos.
+- Se reintenta solo: fallas transitorias (timeouts, 500, 502, 503, caídas). Nunca se reintenta: errores 4xx definitivos.
+- Máximo 3 intentos, con retroceso exponencial (1s, 2s, 4s).
+- La clave del envío es envio-{order_id} y no cambia entre reintentos.
+- Una orden solo pasa a SHIPPED con una guía válida.
+- Si no se sabe el resultado, la orden queda en UNKNOWN y no se pierde.
+
 ## Claude NO debe
 - No inventar reglas de negocio ni asumir políticas comerciales ausentes en este documento.
 - No modificar esquemas en Postgres directamente; utilizar siempre Alembic.

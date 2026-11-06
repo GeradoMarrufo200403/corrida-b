@@ -41,10 +41,18 @@ def validate_lines(lines: list[LineIn]) -> None:
 
 
 def merge_lines(lines: list[LineIn]) -> list[LineIn]:
-    merged: dict[str, int] = {}
+    merged: dict[str, LineIn] = {}
     for line in lines:
-        merged[line.sku] = merged.get(line.sku, 0) + line.quantity
-    return [LineIn(sku=sku, quantity=qty) for sku, qty in merged.items()]
+        if line.sku in merged:
+            merged[line.sku].quantity += line.quantity
+        else:
+            merged[line.sku] = LineIn(
+                sku=line.sku,
+                product_name=line.product_name,
+                unit_price=line.unit_price,
+                quantity=line.quantity,
+            )
+    return list(merged.values())
 
 
 def is_vip(customer_email: str) -> bool:
